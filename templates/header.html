@@ -1,43 +1,38 @@
 <nav class="navbar navbar-expand-lg bg-white shadow-sm">
     <div class="container">
-        <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'jobs:job_list_view' %}">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'posts:post-list' %}">
             <i class="bi bi-briefcase me-2"></i>
             <span class="fw-semibold">Job Board</span>
         </a>
 
-        <!-- Mobile Toggle -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Nav Items -->
         <div class="collapse navbar-collapse" id="navbarNav">
             {% if user.is_authenticated %}
-                <!-- Authenticated User Navigation -->
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'post_list_view' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'post-list' %}active{% endif %}"
                            href="{% url 'posts:post-list' %}">
                             Posts
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'job_list_view' %}active{% endif %}" 
-                           href="{% url 'jobs:job_list_view' %}">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'jobs' %}active{% endif %}"
+                           href="{% url 'jobs:list' %}">
                             Jobs
                         </a>
                     </li>
                 </ul>
 
-                <!-- User Menu -->
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                            id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {% if user.profile.profile_picture %}
-                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile" 
+                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile"
                                      class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
                             {% else %}
                                 <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center me-2"
@@ -45,11 +40,11 @@
                                     <i class="bi bi-person text-secondary" style="font-size: 1.1rem;"></i>
                                 </div>
                             {% endif %}
-                            <span>{{ user.profile.first_name }}</span>
+                            <span>{{ user.profile.first_name|default:user.email }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="navbarDropdown">
                             <li>
-                                <a class="dropdown-item" href="{% url 'auth:profile_view' %}">
+                                <a class="dropdown-item" href="{% url 'auth:profile' %}">
                                     <i class="bi bi-person me-2"></i>Profile
                                 </a>
                             </li>
@@ -63,7 +58,6 @@
                     </li>
                 </ul>
             {% else %}
-                <!-- Guest Navigation -->
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a href="{% url 'auth:signin' %}" class="btn btn-primary">

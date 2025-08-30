@@ -6,13 +6,13 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h4 class="mb-0">Create a New Post</h4>
+                    <h4 class="mb-0">{% if form.instance.pk %}Edit Job{% else %}Post a New Job{% endif %}</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" novalidate>
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         {{ form.as_p }}
-                        <button type="submit" class="btn btn-primary mt-3">Post</button>
+                        <button type="submit" class="btn btn-primary mt-3">Submit</button>
                     </form>
                 </div>
             </div>
