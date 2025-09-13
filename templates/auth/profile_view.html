@@ -1,39 +1,45 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    <title>{{ profile.first_name }}'s Profile</title>
+    <title>
+        {% if profile.first_name %}{{ profile.first_name }}'s Profile{% else %}{{ user.email }}'s Profile{% endif %}
+    </title>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <!-- Profile Card -->
     <div class="row justify-content-center mb-4">
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="row">
-                        <!-- Profile Picture -->
                         <div class="col-md-4 text-center mb-3 mb-md-0">
-                            {% if profile.profile_picture %}
-                                <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" 
-                                     class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                            {% else %}
-                                <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
-                                     style="width: 150px; height: 150px;">
-                                    <i class="bi bi-person display-4 text-secondary"></i>
-                                </div>
-                            {% endif %}
+                            <img src="{{ profile.profile_picture.url }}" alt="Profile Picture"
+                                 class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                         </div>
-                        <!-- Profile Info -->
+
                         <div class="col-md-8">
-                            <h2 class="mb-2">{{ profile.first_name }} {{ profile.last_name }}</h2>
-                            <p class="text-muted mb-2">
+                            <h2 class="mb-2">
+                                {% if profile.first_name and profile.last_name %}
+                                    {{ profile.first_name }} {{ profile.last_name }}
+                                {% else %}
+                                    {{ user.email }}
+                                {% endif %}
+                            </h2>
+
+                            <p class="text-muted mb-3">
                                 <i class="bi bi-envelope me-2"></i>{{ user.email }}
                             </p>
+
                             {% if profile.bio %}
-                                <h6 class="text-muted mb-2">About</h6>
-                                <p class="mb-3">{{ profile.bio }}</p>
+                                <p class="mb-4">{{ profile.bio }}</p>
+                            {% else %}
+                                <p class="text-muted mb-4"><i>No bio provided. Click "Edit Profile" to add one.</i></p>
                             {% endif %}
+
+                            <a href="{% url 'auth:profile_edit' %}" class="btn btn-primary">
+                                <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -45,13 +51,6 @@
 <style>
 .card {
     border: none;
-}
-.table {
-    margin-bottom: 0;
-}
-.badge {
-    font-weight: 500;
-    padding: 0.5em 1em;
 }
 </style>
 {% endblock %}

@@ -4,8 +4,7 @@ from .views import job_list_view, job_detail_view, JobUpdateView, JobDeleteView,
 app_name = 'jobs'
 
 urlpatterns = [
-    # Using shorter names makes them easier to call from templates
-    # e.g., {% url 'jobs:list' %} instead of {% url 'jobs:job_list_view' %}
+
     path('', job_list_view, name='list'),
     path('create/', JobCreateView.as_view(), name='create'),
     path('<int:pk>/', job_detail_view, name='detail'),

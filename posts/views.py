@@ -1,29 +1,81 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView, CreateView
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
-from .models import Post
-from .forms import PostForm
+# ✅ 1. IMPORT THE NEW MODELS AND FORMS
+from .models import Post, Comment, Like
+from .forms import PostForm, CommentForm
 
 
-# ✅ IMPROVED: Made this view require a login using the standard mixin for consistency.
+# ✅ 2. ADD THIS NEW VIEW TO HANDLE LIKES
+def toggle_like(request, slug):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    post = get_object_or_404(Post, slug=slug)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+
+    return JsonResponse({'liked': liked, 'like_count': post.like_count})
+
+
 class PostListView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'posts/post_list.html'
+    # Order posts by newest first
+    queryset = Post.objects.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get a set of post slugs that the current user has liked
+        liked_posts = Like.objects.filter(user=self.request.user).values_list('post__slug', flat=True)
+        context['liked_posts'] = set(liked_posts)
+        return context
 
 
+# ✅ 3. UPDATE THIS VIEW TO HANDLE COMMENTS
 class PostDetailSlugView(DetailView):
-    queryset = Post.objects.all()
+    model = Post
     template_name = 'posts/post_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = self.get_object()
+        context['comments'] = Comment.objects.filter(post=post).order_by('-created_at')
+        context['comment_form'] = CommentForm()
+        if self.request.user.is_authenticated:
+            context['user_has_liked'] = Like.objects.filter(post=post, user=self.request.user).exists()
+        return context
 
-# ✅ IMPROVED: Added LoginRequiredMixin for consistency.
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('auth:signin')
+
+        post = self.get_object()
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.user = request.user
+            comment.save()
+            return redirect('posts:post-detail', slug=post.slug)
+        else:
+            # If the form is invalid, re-render the page with the form and its errors
+            context = self.get_context_data()
+            context['comment_form'] = form
+            return self.render_to_response(context)
+
+
 class PostDeleteView(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'posts/post_confirm_delete.html'
-    # ✅ FIXED: success_url must use reverse_lazy to find the URL name correctly.
     success_url = reverse_lazy('posts:post-list')
 
     def get_object(self, queryset=None):
@@ -34,7 +86,6 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class PostUpdateView(LoginRequiredMixin, UpdateView):
-    # ✅ FIXED: Added the required model, form, and template attributes.
     model = Post
     form_class = PostForm
     template_name = 'posts/post_update.html'
@@ -49,7 +100,6 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('posts:post-detail', kwargs={'slug': self.object.slug})
 
 
-# ✅ IMPROVED: Added LoginRequiredMixin to ensure only logged-in users can create posts.
 class PostCreateView(LoginRequiredMixin, CreateView):
     form_class = PostForm
     template_name = 'posts/post_create.html'

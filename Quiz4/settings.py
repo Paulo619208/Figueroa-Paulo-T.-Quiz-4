@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
-LOGIN_REDIRECT_URL = reverse_lazy('posts:post-list') # ✅ 2. UPDATED THIS LINE
+LOGIN_REDIRECT_URL = reverse_lazy('posts:post-list')
 LOGIN_URL = 'auth:signin'
 
 MIDDLEWARE = [

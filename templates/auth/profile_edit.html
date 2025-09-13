@@ -6,14 +6,13 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h4 class="mb-0">Edit Post</h4>
+                    <h4 class="mb-0">Edit Your Profile</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" novalidate>
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-                        <a href="{{ object.get_absolute_url }}" class="btn btn-secondary mt-3">Cancel</a>
                     </form>
                 </div>
             </div>
